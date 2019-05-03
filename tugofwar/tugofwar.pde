@@ -1,6 +1,6 @@
-float playerRatio=900; //Position of the ball. No longer a ratio, this is now the X position of the ball in pixels. Midpoint is 900, it goes from 0 to 1800 px.
+float playerRatio=875; //Position of the ball. No longer a ratio, this is now the X position of the ball in pixels. Midpoint is 900, it goes from 0 to 1800 px.
 float SCALE_FACTOR=0.5; //how rapidly pulling force translates into difference
-float ARTIFACT_THRESH=20; //if the power value is above this, we consider it contaminated with artifact and don't use it to update the player's power
+float ARTIFACT_THRESH=4; //if the power value is above this, we consider it contaminated with artifact and don't use it to update the player's power
 PFont theFont;
 float fudgeFactor=0; //fudgeFactor/fudgeSamples represents the average movement rate DURING THE BASELINE PERIOD. We substract this out during the game to implement baseline correction
 int fudgeSamples=0;
@@ -35,7 +35,6 @@ float computeSWA(String data) { //returns the spectrum-weighted average (brain r
 }
 
 
-
 void updateData() { //retrieve power spectra from the server and calculate the player ratio
   while (true) {
      String temp1=loadStrings("http://biostream-1024.appspot.com/getps?user=player1")[0];
@@ -49,14 +48,20 @@ void updateData() { //retrieve power spectra from the server and calculate the p
      }
      else {
        dataGoodPlayer1=false;
+       if (millis() -startTime > 20000) { //after 20 seconds of baseline data we are in the game period
+       player1="0,0";
+       }
      }
      
-          if (power2 <= ARTIFACT_THRESH) {
+     if (power2 <= ARTIFACT_THRESH) {
        player2=temp2;
        dataGoodPlayer2=true;
      }
      else {
        dataGoodPlayer2=false;
+       if (millis() -startTime > 20000) { //after 20 seconds of baseline data we are in the game period
+       player2="0,0";
+       }
      }
      
     //simulation for before we have a client to send data
