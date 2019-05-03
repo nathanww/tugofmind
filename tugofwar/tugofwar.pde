@@ -10,6 +10,7 @@ long startTime=0;
 String state="GAME"; 
 PrintWriter output;
 
+int lastSensitivity=0;
 boolean dataGoodPlayer1=false; //indicates if we have valid data from each player, used to control color of the display
 boolean dataGoodPlayer2=false;
 
@@ -49,7 +50,7 @@ void updateData() { //retrieve power spectra from the server and calculate the p
      else {
        dataGoodPlayer1=false;
        if (millis() -startTime > 20000) { //after 20 seconds of baseline data we are in the game period
-       player1="0,0";
+       player1="0,4";
        }
      }
      
@@ -60,7 +61,7 @@ void updateData() { //retrieve power spectra from the server and calculate the p
      else {
        dataGoodPlayer2=false;
        if (millis() -startTime > 20000) { //after 20 seconds of baseline data we are in the game period
-       player2="0,0";
+       player2="0,4";
        }
      }
      
@@ -97,8 +98,12 @@ void draw() {
  
   //compute the position on each frame so movement of the ball is smooth ven though the data updating only happens every 1 second
   if (state == "GAME") {
+    if (millis() - lastSensitivity > 2000) { //INCREASE SENTIVITY AS THE GAME GOES ON
+      lastSensitivity=millis();
+      SCALE_FACTOR=SCALE_FACTOR+0.05;
+    }
       background(0);// draws black over everything, resetting the backround
-    println(computeAlphaPower(player1)/computeAlphaPower(player2)); 
+    //println(computeAlphaPower(player1)/computeAlphaPower(player2)); 
   
   
   if (millis() -startTime > 20000) { //after 20 seconds of baseline data we are in the game period
@@ -106,12 +111,15 @@ void draw() {
       fill(255,255,255);
      text("Pull!",750,350);
     }
- playerRatio=playerRatio+((computeAlphaPower(player2)-computeAlphaPower(player1))*SCALE_FACTOR)-(fudgeFactor/fudgeSamples);
+ //playerRatio=playerRatio+((computeAlphaPower(player2)-computeAlphaPower(player1))*SCALE_FACTOR)-(fudgeFactor/fudgeSamples);
+ playerRatio=playerRatio+((computeAlphaPower(player1)-computeAlphaPower(player2))*SCALE_FACTOR)-(fudgeFactor/fudgeSamples);
   }
   else if (millis() -startTime > 500) {
     fill(255,255,255);
      text("Get ready!",750,350);
-    fudgeFactor=fudgeFactor+(((computeAlphaPower(player2)-computeAlphaPower(player1))*SCALE_FACTOR));
+    //fudgeFactor=fudgeFactor+(((computeAlphaPower(player2)-computeAlphaPower(player1))*SCALE_FACTOR));
+        fudgeFactor=fudgeFactor+(((computeAlphaPower(player1)-computeAlphaPower(player2))*SCALE_FACTOR));
+
     fudgeSamples++;
   }
   
